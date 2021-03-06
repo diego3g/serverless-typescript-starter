@@ -1,0 +1,51 @@
+service:
+  name: atlas
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  serverless-iamroles:
+    defaultInherit: true
+  prune:
+    automatic: true
+    number: 3
+
+plugins:
+  - serverless-offline
+  - serverless-webpack
+  - serverless-iamroles
+  - serverless-prune-plugin
+  - serverless-plugin-tracing
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  frameworkVersion: ‘1.64.1’
+  stage: ${opt:stage, 'local'}
+  region: ${opt:region, 'us-east-1'}
+  timeout: 900
+  apiGateway:
+    minimumCompressionSize: 1024
+  environment:
+    DEBUG: '*'
+    NODE_ENV: ${self:provider.stage}
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  tracing:
+    lambda: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTraceSegments
+        - xray:PutTelemetryRecords
+      Resource: "*"
+
+functions:
+  authenticate:
+    handler: src/functions/authenticate.handle
+    memorySize: 512
+    events:
+      - http:
+          path: /authenticate
+          method: POST
+          cors: true
