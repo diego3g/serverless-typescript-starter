@@ -9,5 +9,7 @@ jspm_packages
 .webpack
 
 # Layers
-
 ffmpeg-layer/layer
+
+# ESLint cache
+.eslintcache
